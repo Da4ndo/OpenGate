@@ -1,0 +1,36 @@
+{
+	"config": {
+		"step": {
+			"user": {
+				"title": "OpenGate Detection Setup",
+				"description": "Configure your OpenGate texture-based detection system.",
+				"data": {
+					"camera_url": "Camera URL (RTSP, HTTP, or camera index)",
+					"detection_interval": "Detection interval (seconds)",
+					"confidence_threshold": "Confidence threshold (0.0-1.0)",
+					"pattern_similarity": "Pattern similarity threshold (0.0-1.0)"
+				}
+			}
+		},
+		"error": {
+			"invalid_camera_url": "Invalid camera URL format",
+			"unknown": "Unexpected error occurred"
+		},
+		"abort": {
+			"already_configured": "OpenGate Detection is already configured"
+		}
+	},
+	"options": {
+		"step": {
+			"init": {
+				"title": "OpenGate Detection Options",
+				"description": "Configure OpenGate detection options.",
+				"data": {
+					"detection_interval": "Detection interval (seconds)",
+					"confidence_threshold": "Confidence threshold (0.0-1.0)",
+					"pattern_similarity": "Pattern similarity threshold (0.0-1.0)"
+				}
+			}
+		}
+	}
+} 

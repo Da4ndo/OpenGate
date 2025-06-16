@@ -1,0 +1,34 @@
+recalibrate:
+  name: Recalibrate Gate Detection
+  description: Recalibrate the gate detection system with current closed gate state
+  target:
+    entity:
+      integration: opengate_detection
+      domain: binary_sensor
+  fields:
+    samples:
+      name: Number of samples
+      description: Number of calibration samples to capture
+      required: false
+      default: 10
+      selector:
+        number:
+          min: 5
+          max: 20
+          step: 1
+
+set_roi:
+  name: Set Region of Interest
+  description: Set the region of interest points for gate detection
+  target:
+    entity:
+      integration: opengate_detection
+      domain: binary_sensor
+  fields:
+    points:
+      name: ROI Points
+      description: Four corner points of the gate area [top-left, top-right, bottom-right, bottom-left]
+      required: true
+      example: "[[100,100], [200,100], [200,200], [100,200]]"
+      selector:
+        text: 
