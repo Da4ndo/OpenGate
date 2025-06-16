@@ -25,7 +25,7 @@ def test_manifest_exists_and_valid():
     
     assert manifest['domain'] == 'opengate_detection'
     assert manifest['name'] == 'OpenGate Detection'
-    assert manifest['version'] == '1.0.1'
+    assert manifest['version'] == '1.0.2'
     assert isinstance(manifest['requirements'], list)
     assert len(manifest['requirements']) > 0
 
