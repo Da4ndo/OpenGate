@@ -9,8 +9,7 @@ import pickle
 import time
 from collections import deque
 from typing import List, Tuple, Dict, Any, Optional
-from skimage.feature import local_binary_pattern
-from skimage.measure import shannon_entropy
+# Removed scikit-image dependency - using OpenCV equivalents
 import logging
 from dataclasses import dataclass
 
@@ -205,14 +204,49 @@ class GateDetector:
 		
 		return roi
 	
+	def _calculate_lbp_opencv(self, gray_roi: np.ndarray, radius: int = 3, n_points: int = 24) -> np.ndarray:
+		"""Calculate Local Binary Pattern using OpenCV operations."""
+		h, w = gray_roi.shape
+		lbp = np.zeros_like(gray_roi, dtype=np.uint8)
+		
+		# Simplified LBP using circular sampling points
+		for i in range(n_points):
+			angle = 2 * np.pi * i / n_points
+			dy = int(radius * np.sin(angle))
+			dx = int(radius * np.cos(angle))
+			
+			# Shift the image by (dy, dx)
+			shifted = np.zeros_like(gray_roi)
+			if dy >= 0 and dx >= 0:
+				shifted[dy:, dx:] = gray_roi[:-dy or None, :-dx or None]
+			elif dy >= 0 and dx < 0:
+				shifted[dy:, :dx] = gray_roi[:-dy or None, -dx:]
+			elif dy < 0 and dx >= 0:
+				shifted[:dy, dx:] = gray_roi[-dy:, :-dx or None]
+			else:
+				shifted[:dy, :dx] = gray_roi[-dy:, -dx:]
+			
+			# Create binary pattern
+			lbp += ((shifted >= gray_roi) << i).astype(np.uint8)
+		
+		return lbp
+	
+	def _calculate_entropy(self, gray_roi: np.ndarray) -> float:
+		"""Calculate Shannon entropy using histogram."""
+		hist, _ = np.histogram(gray_roi, bins=256, range=(0, 256))
+		hist = hist[hist > 0]  # Remove zero entries
+		prob = hist / np.sum(hist)
+		entropy = -np.sum(prob * np.log2(prob + 1e-7))
+		return entropy
+	
 	def analyze_texture_pattern(self, roi: np.ndarray) -> Dict[str, Any]:
 		"""Analyze texture patterns in the ROI to create a signature."""
 		gray_roi = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY) if len(roi.shape) == 3 else roi
 		
-		# Local Binary Pattern analysis
+		# Local Binary Pattern analysis using OpenCV
 		lbp_radius = self.config.get('lbp_radius', 3)
 		lbp_n_points = self.config.get('lbp_n_points', 24)
-		lbp = local_binary_pattern(gray_roi, lbp_n_points, lbp_radius, method='uniform')
+		lbp = self._calculate_lbp_opencv(gray_roi, lbp_radius, lbp_n_points)
 		lbp_hist, _ = np.histogram(lbp.ravel(), bins=lbp_n_points + 2, range=(0, lbp_n_points + 2))
 		lbp_hist = lbp_hist.astype(float)
 		lbp_hist /= (lbp_hist.sum() + 1e-7)  # Normalize
@@ -235,7 +269,7 @@ class GateDetector:
 		texture_uniformity = 1.0 / (1.0 + texture_variance)
 		
 		# Statistical features
-		entropy = shannon_entropy(gray_roi)
+		entropy = self._calculate_entropy(gray_roi)
 		mean_intensity = np.mean(gray_roi)
 		std_intensity = np.std(gray_roi)
 		
