@@ -1,7 +1,6 @@
 {
 	"name": "OpenGate Detection",
-	"domains": ["binary_sensor", "sensor"],
-	"iot_class": "Local Polling",
+	"hacs": "2.0.0",
 	"homeassistant": "2023.2.0",
 	"render_readme": true,
 	"zip_release": false
